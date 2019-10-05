@@ -77,6 +77,7 @@ void game();
 void game_init();
 void player_name();
 void scan_word();
+void masking_init();
 void lower_string(char s[]);
 void print_hangman(int life);
 void print_word();
@@ -251,18 +252,13 @@ void game(){
 		int complete = 0;
 		
 		scan_word();
-		
-		// inisialisasi masking "_" (0 = aktif, 1 = mati)
-		N = strlen(answer);
-		for (i=0; i < N; ++i) {
-			mask[i] = 0;
-		}
+		masking_init();
 
 		while ((complete == 0) && (life[turn]>0)) {
 			print_hangman(life[turn]);
-			print_word(mask);
+			print_word();
 			scan_letter();
-			calculate(mask);
+			calculate();
 			
 			// menentukan apa jawaban sudah diselesaikan atau belum
 			complete = 1;
@@ -454,6 +450,14 @@ void print_word(){
 		}
 	}
 	printf("\n");
+}
+
+//===============================================================================================================================================================================================================================================================
+void masking_init(){
+	N = strlen(answer);
+		for (i=0; i < N; ++i) {
+			mask[i] = 0;
+		}
 }
 
 //===============================================================================================================================================================================================================================================================

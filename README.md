@@ -28,7 +28,7 @@ Pengguna akan masuk ke tampilan menu,.pilih play untuk memainkan game.
 
 Kedua pemain memasukan nama yang dipergunakan dalam game.
 ### Give a Question
-![Question](/ss/gibQeus.png)
+![Question](/ss/gibQues.png)
 
 Salah satu pemain akan ditunjuk sebagai 'penanya' secara random kemudian memberikan kata untuk ditebak kepada lawan.
 ### Guess the Word

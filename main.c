@@ -44,6 +44,7 @@ int complete;
 int attempt;
 int correct = 0;
 int correct_total;
+FILE *fp;
 
 int i,j,k,l,m,N;
 
@@ -73,10 +74,10 @@ void printimg(char* x, int y);
 SYSTEMTIME myTime;
 char month[12][5]={"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-void game();
+void game(int mode);
 void game_init();
-void player_name();
-void scan_word();
+void player_name(int a);
+void scan_word(int a, int b);
 void masking_init();
 void lower_string(char s[]);
 void print_hangman(int life);
@@ -89,7 +90,6 @@ void main() {
 	
 	init();
 	menu();
-
 }
 
 //===============================================================================================================================================================================================================================================================// deklarasi global
@@ -127,7 +127,7 @@ int menu()
 {
     int key = 0;
 	int position = 1;
-	int maxoption = 3;
+	int maxoption = 4;
     while(key != ENTER){
     	system("cls");
     	y_screensize(48);
@@ -139,12 +139,15 @@ int menu()
 		color(14, 0);
 		printf("\t\t\t\t\t\t\t\t");
 		highlight(1,position);
-		printf("|             Play              |\n");
+		printf("|       Play Singleplayer       |\n");
 		printf("\t\t\t\t\t\t\t\t");
 		highlight(2,position);
-		printf("|             Help              |\n");
+		printf("|       Play Multiplayer        |\n");
 		printf("\t\t\t\t\t\t\t\t");
 		highlight(3,position);
+		printf("|             Help              |\n");
+		printf("\t\t\t\t\t\t\t\t");
+		highlight(4,position);
 		printf("|             Exit              |\n");
 		color(14, 0);
 		printf("\t\t\t\t\t\t\t\t=================================\n");
@@ -170,12 +173,15 @@ int menu()
 	}
 	switch(position){
 		case 1:
-			game();
+			game(1);
 			break;
 		case 2:
-			help();
+			game(2);
 			break;
 		case 3:
+			help();
+			break;
+		case 4:
 			res(1920, 1080);
         	exit(0);
 	}
@@ -190,21 +196,21 @@ int help()
 	printf("\t\t\t\t\t\t\t\t=================================\n");
     printf("\t\t\t\t\t\t\t\t|         Help section          |\n");
     printf("\t\t\t\t\t\t\t\t=================================\n\n");
-	printf("\t\t\t\t");
-	printf("In this program you can buy movie tickets by following these steps :");
-	printf("\n\n\t\t\t\t");
-	printf("1. Choose one of the movies by typing the corresponding number.");
-	printf("\n\t\t\t\t");
-	printf("2. You will be asked to confirm the movie. Press 'Enter' to confirm, or press 'Esc' if you want to go back to the previous page.");
-	printf("\n\t\t\t\t");
-	printf("3. Choose one of the movie schedules.");
-	printf("\n\t\t\t\t");
-	printf("4. type the amount of seats that will be booked.");
-	printf("\n\t\t\t\t");
-	printf("6. Choose each location of the seats by typing the seat's codes once at a time.");
-	printf("\n\t\t\t\t");
-	printf("7. Confirm your order(s), then check-out.");
-	printf("\n\n\t\t\t\t");
+	printf("\t\t");
+	printf("This game is a multiplayer Hangman classic word game in which you must guess the secret word one letter at a time with folowing rules :");
+	printf("\n\n\t\t");
+	printf("1. Both players will enter their in nicknames. The game will be started by one of the two players.");
+	printf("\n\t\t");
+	printf("2. One of the players will give a word to be guessed by another player.");
+	printf("\n\t\t");
+	printf("3. Guesser needs to guess the word that has been given by the other player, 1 letter at a time, to reveal the secret word.");
+	printf("\n\t\t");
+	printf("4. Each incorrect guess adds a part to the hangman drawing. You can only make up to 5 incorrect guesses.");
+	printf("\n\t\t");
+	printf("6. If the guesser manages to find the answer, he/she has to give another word for the other player to guess.");
+	printf("\n\t\t");
+	printf("7. The game will repeat itself until the guesser fails to guess the word, and the winner is the player who gives the question.");
+	printf("\n\n\t\t");
     system("pause");
     return menu();
 }
@@ -242,45 +248,91 @@ void footer()
 }
 
 //===============================================================================================================================================================================================================================================================
-void game(){
-	player_name();
-	game_init();
-	while(life[turn]>0){
-		life[0] = 5;
-		life[1] = 5;
-		turn = (turn+1)%2;
-		int complete = 0;
-		
-		scan_word();
-		masking_init();
-
-		while ((complete == 0) && (life[turn]>0)) {
-			print_hangman(life[turn]);
-			print_word();
-			scan_letter();
-			calculate();
+void game(int mode){
+	int difficulty;
+	
+	if(mode == 1){
+		player_name(mode);
+		difficulty = diff();	
+		game_init();
+		while(life[turn]>0){
+			life[0] = 5;
+			turn = 0;
+			int complete = 0;
 			
-			// menentukan apa jawaban sudah diselesaikan atau belum
-			complete = 1;
-			for(m = 0; m < N; ++m) {
-				if (!mask[m]) {
-					complete = 0;
-					break;
+			scan_word(mode, difficulty);
+			masking_init();
+	
+			while ((complete == 0) && (life[turn]>0)) {
+				print_hangman(life[turn]);
+				print_word();
+				scan_letter();
+				calculate();
+				
+				// menentukan apa jawaban sudah diselesaikan atau belum
+				complete = 1;
+				for(m = 0; m < N; ++m) {
+					if (!mask[m]) {
+						complete = 0;
+						break;
+					}
 				}
 			}
+			
+			score[turn]++;
+			round++;
 		}
-		
-		score[turn]++;
-		round++;
+	
+		system("cls");
+		if(life[turn]<=0){
+			print_hangman(life[turn]);
+			printf("Game Over.");
+			printf("Jawabannya adalah \"%s\".\n", answer);
+			system("pause");
+			menu();
+		}
 	}
-
-	system("cls");
-	if(life[turn]<=0){
-		print_hangman(life[turn]);
-		printf("Pemenangnya adalah : %s\n", player[(turn+1)%2]);
-		printf("Jawabannya adalah \"%s\".\n", answer);
-		system("pause");
-		menu();
+	
+	else if(mode == 2){
+		player_name(mode);
+		game_init();
+		while(life[turn]>0){
+			life[0] = 5;
+			life[1] = 5;
+			turn = (turn+1)%2;
+			int complete = 0;
+			
+			scan_word(mode, difficulty);
+			masking_init();
+	
+			while ((complete == 0) && (life[turn]>0)) {
+				print_hangman(life[turn]);
+				print_word();
+				scan_letter();
+				calculate();
+				
+				// menentukan apa jawaban sudah diselesaikan atau belum
+				complete = 1;
+				for(m = 0; m < N; ++m) {
+					if (!mask[m]) {
+						complete = 0;
+						break;
+					}
+				}
+			}
+			
+			score[turn]++;
+			round++;
+		}
+	
+		system("cls");
+		if(life[turn]<=0){
+			print_hangman(life[turn]);
+			printf("Pemenangnya adalah : %s\n", player[(turn+1)%2]);
+			printf("Jawabannya adalah \"%s\".\n", answer);
+			system("pause");
+			menu();
+		}
 	}
 }
 
@@ -296,24 +348,68 @@ void game_init(){
 }
 
 //===============================================================================================================================================================================================================================================================
-void player_name(){
+void player_name(int a){
 	system("cls");
 	header();
 	printf("Masukkan nama player 1 : ");
 	scanf("%s",player[0]);
-	printf("Masukkan nama player 2 : ");
-	scanf("%s",player[1]);
+	if(a==2){
+		printf("Masukkan nama player 2 : ");
+		scanf("%s",player[1]);
+	}
 	system("cls");
 }
 
 //===============================================================================================================================================================================================================================================================
-void scan_word(){
+int diff(){
+	int a;
+	system("cls");
+	header();
+	printf("Tingkat Kesulitan:\n1. Easy\n2. Medium\n3. Hard\n\nPilih dengan mengetikkan angka : ");
+	scanf("%d", &a);
+	system("cls");
+	return a;
+}
+
+
+
+//===============================================================================================================================================================================================================================================================
+void scan_word(int a, int b){
 	system("cls");
 	header();
 	printf("\nRonde\t: %d \nGiliran\t: %s \nScore\t: %d - %d \n\n", round, player[(turn+1)%2], score[0], score[1]);
-	printf("Masukkan sebuah kata : ");
-	fflush(stdout);
-	scanf(" %s", answer);
+	
+	switch(a){
+		case 1:
+			srand(time(0));
+			int n;
+			switch (b){
+				case 1:
+					n = rand()%191;
+					break;
+				case 2:
+					n = 191 + rand()%260;
+					break;
+				case 3:
+					n = 260 + rand()%359;
+					break;
+			}
+
+			fp = fopen("words.txt","r");
+			for(i=0; i<n; i++){
+				fgets(answer, 128, fp);
+			}
+			int len = strlen(answer);
+			if(answer[len-1]=='\n')
+			answer[len-1]='\0';
+			break;
+		case 2:
+			printf("Masukkan sebuah kata : ");
+			fflush(stdout);
+			scanf(" %s", answer);
+			break;
+	}
+
 	lower_string(answer);
 }
 
